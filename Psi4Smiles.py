@@ -231,14 +231,14 @@ def smilesToMolFile(smiles, molFileName='Molecule', fileFormat='xyz', verbose=0)
     # TODO: Make sure that the file is output to the correct location!!
     # TODO: How is chirality going to be handled?
     if (verbose < 2):
-        OpenBabelProcess = subprocess.Popen(openBabelCommand,
+        openBabelProcess = subprocess.Popen(openBabelCommand,
                                            shell=True,
                                            stderr=subprocess.DEVNULL,
                                            stdout=subprocess.DEVNULL)
     else:
-        OpenBabelProcess = subprocess.Popen(openBabelCommand,
+        openBabelProcess = subprocess.Popen(openBabelCommand,
                                            shell=True)
-    OpenBabelProcess.wait()
+    openBabelProcess.wait()
 
     return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -297,14 +297,14 @@ def molFileToConfTraj(smiles,
     # Execute the command on the shell and wait until finished. An output file will be produced.
     # TODO: Make sure that the file is output to the correct location!!
     if (verbose < 2):
-        OpenBabelProcess = subprocess.Popen(openBabelCommand,
+        openBabelProcess = subprocess.Popen(openBabelCommand,
                                            shell=True,
                                            stderr=subprocess.DEVNULL,
                                            stdout=subprocess.DEVNULL)
     else:
-        OpenBabelProcess = subprocess.Popen(openBabelCommand,
+        openBabelProcess = subprocess.Popen(openBabelCommand,
                                            shell=True)
-    OpenBabelProcess.wait()
+    openBabelProcess.wait()
 
     return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
