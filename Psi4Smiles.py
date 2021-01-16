@@ -16,7 +16,7 @@
 # This file is part of Psi4Smiles.
 #
 # Psi4Smiles is free software; you can redistribute it and/or modify
-# it under the tesms of the GNU Lesser General Public License as 
+# it under the tesms of the GNU Lesser General Public License as
 # published by the Free Software Foundation, version 3.
 #
 # Psi4Smiles is distributed in the hope that it will be useful,
@@ -24,9 +24,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
-# You should have received a copy of the GNU Lesser General Public 
+# You should have received a copy of the GNU Lesser General Public
 # License along with Psi4Smiles; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301 USA.
 #
 # @END LICENSE
@@ -100,7 +100,7 @@ def createParser():
     hsf = "Type of scoring function for conformational search, i.e. 'energy' (default: 'rmsd')"
     hab = "Molecule name abbreviation for file names and variables, i.e. 'EtOH' (default: 'MOL')"
     hfn = "Full molecule name for text labels, i.e. 'Ethylic alcohol'"
-    hvb = "Level of verbosity: 0 = Error, 1 = Warnings, 2 = Information, 3 = Debug. (default: 0)" 
+    hvb = "Level of verbosity: 0 = Error, 1 = Warnings, 2 = Information, 3 = Debug. (default: 0)"
     hmm = "Psi4 memory in gigabytes, i.e. '2'"
     hmt = "Psi4 method specification string, i.e. 'B97-D3/aug-cc-pVTZ'"
     hsc = "Psi4 SCF algorithm type, i.e. 'DIRECT' (default: DF)"
@@ -202,6 +202,7 @@ def printHeader(keywords):
     if (keywords['Verbosity'] > 0):
         print("\n{}\n".format(36*"-="))
         print("{}{}".format(31*" ", "Psi4Smiles"))
+
         subtitle = """
 The tool for the automated execution of genetic algorithm conformational
 search coupled with a Psi4 conformer input generator from SMILES strings
@@ -211,6 +212,7 @@ using Open Babel.
            Department of Chemical and Biological Engineering
                School of Engineering and Applied Science
                           Princeton University"""
+
         print("{}".format(subtitle))
         print("\n{}\n".format(36*"-="))
 
@@ -555,7 +557,7 @@ def getAvailMemFromPsutil(verbose=0):
     memInBytes = svmem.available
 
     # Information printouts.
-    print("\nCurrent available system memory (RAM) = {:.2f} MB".format(memInBytes/(1024*1024))) if (verbose > 1) else None
+    print("\nAvailable system memory (RAM) = {:.2f} MB".format(memInBytes/(1024*1024))) if (verbose > 1) else None
 
     return memInBytes
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -602,14 +604,14 @@ def conformerToPsithon(conformer,
     p4In += "#          Princeton, New Jersey, USA\n\n"
 
     # Molecule details
-    p4In += "# Molecule name              = {}\n"      .format(conformer['MoleculeName']   ) 
-    p4In += "# Molecule name abbreviation = {}\n"      .format(conformer['MoleculeAbv']    ) 
-    p4In += "# SMILES descriptor          = {}\n"      .format(conformer['SMILES']         ) 
-    p4In += "# Number of atoms            = {}\n"      .format(conformer['NumberOfAtoms']  ) 
+    p4In += "# Molecule name              = {}\n"      .format(conformer['MoleculeName']   )
+    p4In += "# Molecule name abbreviation = {}\n"      .format(conformer['MoleculeAbv']    )
+    p4In += "# SMILES descriptor          = {}\n"      .format(conformer['SMILES']         )
+    p4In += "# Number of atoms            = {}\n"      .format(conformer['NumberOfAtoms']  )
     p4In += "# Molecular weight           = {} g/mol\n".format(conformer['MolecularWeight'])
-    p4In += "# Molecular charge           = {} a.u.\n" .format(conformer['Charge']         ) 
-    p4In += "# Molecular spin multiplicty = {}\n"      .format(conformer['Multiplicity']   ) 
-    p4In += "# Conformer index            = {}\n"      .format(conformer['Index']          ) 
+    p4In += "# Molecular charge           = {} a.u.\n" .format(conformer['Charge']         )
+    p4In += "# Molecular spin multiplicty = {}\n"      .format(conformer['Multiplicity']   )
+    p4In += "# Conformer index            = {}\n"      .format(conformer['Index']          )
 
     # Memory
     p4In += "\nmemory {}\n".format(memStr)
@@ -762,7 +764,7 @@ def buildPsithonsFromConfDict(conformers, psi4, verbose=0):
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 def printFooter(keywords):
     """
-    Prints welcome message and additional execution details.
+    Prints exit message and additional execution details.
 
     Parameters
     ----------
@@ -771,7 +773,7 @@ def printFooter(keywords):
 
     Examples
     --------
-    >>> printHeader(keywords)
+    >>> printFooter(keywords)
     """
 
     print("") if (keywords['Verbosity'] > 1) else None # Info printouts.
