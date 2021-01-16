@@ -38,18 +38,6 @@ __credits__ = ["Carlos H. Borca", "Satyen Dhamakar", "Michael A. Webb"]
 __email__   = "cborca@princeton.edu"
 __license__ = "LGPLv3"
 
-#    To create an Anaconda environment that contains all the dependencies
-#    required by this code, first download a version of Anaconda, i.e.:
-#
-#    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-#
-#    Execute the installer and follow its instructions:
-#
-#    bash Miniconda3-latest-Linux-x86_64.sh
-#    
-#    Then create a conda environment using the following command:
-#        
-#    conda create -n OpenBabelv310 openbabel psutil -c conda-forge
 
 # Module imports.
 import argparse
@@ -58,7 +46,37 @@ import subprocess
 import sys
 
 # Non-standard module imports.
-from openbabel import openbabel # NOTE: Requires the Open Babel python module to be installed in the executing Python.
+try:
+    from openbabel import openbabel # NOTE: Requires the Open Babel python module available through python.
+
+except ImportError:
+    openBabelImportError = """
+    +--------------------------------+
+    | Open Babel Module Import Error | Unable to import the Open Babel module.
+    +--------------------------------+
+
+    Is Open Babel installed in your system?
+    Create a conda environment with the dependencies required by this code.
+    First download a version of Anaconda, i.e. Miniconda:
+
+      $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+    Execute the installer and follow on-screen instructions:
+
+      $ bash Miniconda3-latest-Linux-x86_64.sh
+
+    Then create a conda environment using the following command:
+
+      $ conda create -n Psi4Smiles psi4=1.3.2 psi4-rt=1.3 python=3.7 openbabel=3.1.0 psutil=5.8.0 -c psi4 -c conda-forge
+
+    Once the environment is created created, restart your shell and activate the environment:
+
+      $ conda activate Psi4Smiles
+
+    And execute this program again in the active environment.
+    """
+    print(openBabelImportError)
+    sys.exit()
 
 # Setting up pretty print for debug printouts.
 import pprint
@@ -68,10 +86,11 @@ pp = pprint.PrettyPrinter(indent=2)
 def createParser():
 
     # For the argument parser. An example of usuage and a description of what this script does.
-    exas = "python {} 'CCO' -st Ethanol -ff xyz -ct c.xyz -nc 100 -ab EtOH -fn 'Alcohol' -vb 1 -oe True".format(sys.argv[0])
-    docs = "Psi4Smiles: Automated conformational search and Psi4 conformer inputs generation from SMILES strings"
-    epis = "Execution of this code requires the openbabel module. It also may need psutil."
-    
+    exas =  "python {} 'CCO' -st Ethanol -ff xyz -ct c.xyz -nc 100"
+    exas += " -ab EtOH -fn 'Alcohol' -vb 1 -oe True".format(sys.argv[0])
+    docs =  "Psi4Smiles: Automated conformational search and Psi4 conformer inputs generation from SMILES strings"
+    epis =  "Execution of this code requires the openbabel module. It also may need psutil."
+
     # Help strings.
     hsm = "SMILES string input, i.e. 'CCO'"
     hst = "molecular 3D-structure file name, i.e. 'Ethanol' (default: 'Molecule')"
@@ -98,7 +117,7 @@ def createParser():
 
     # Positional Arguments
     parser.add_argument("sm", metavar="SMILES", type=str, help=hsm)
-    
+
     # No positional arguments have been specified. Optional arguments the script might expect.
     parser.add_argument("-st", "--structn", dest="st", default="Molecule",     help=hst)
     parser.add_argument("-ff", "--3dformt", dest="ff", default="xyz",          help=hff)
@@ -175,7 +194,7 @@ def smilesToMolFile(smiles, molFileName='Molecule', fileFormat='xyz', verbose=0)
     """
     From a SMILES string use Open Babel to write a file with a molecule's 3D
     structure specified by a list of elements and their XYZ coordinates.
-    
+
     Upon execution, Open Babel will output a file with the molecule's
     structure.
 
@@ -210,13 +229,14 @@ def smilesToMolFile(smiles, molFileName='Molecule', fileFormat='xyz', verbose=0)
     # Execute the command on the shell and wait until finished. An output file will be produced.
     # NOTE: The following line requires the executable of OpenBabel to be accessible from the shell.
     # TODO: Make sure that the file is output to the correct location!!
+    # TODO: How is chirality going to be handled?
     if (verbose < 2):
         OpenBabelProcess = subprocess.Popen(openBabelCommand,
-                                           shell=True, 
-                                           stderr=subprocess.DEVNULL, 
+                                           shell=True,
+                                           stderr=subprocess.DEVNULL,
                                            stdout=subprocess.DEVNULL)
     else:
-        OpenBabelProcess = subprocess.Popen(openBabelCommand, 
+        OpenBabelProcess = subprocess.Popen(openBabelCommand,
                                            shell=True)
     OpenBabelProcess.wait()
 
@@ -258,7 +278,7 @@ def molFileToConfTraj(smiles,
 
     Examples
     --------
-    >>> molFileToConfTraj(smiles, molFileName='Molecule', fileFormat='xyz', scoreFunction='rmsd', verbose=2) 
+    >>> molFileToConfTraj(smiles, molFileName='Molecule', fileFormat='xyz', scoreFunction='rmsd', verbose=2)
     1 molecule converted
     """
 
@@ -267,15 +287,14 @@ def molFileToConfTraj(smiles,
     # Option `--score` specifies the scoring function employed to rank conformers.
     # Option `--writeconformers` outputs conformer structures to a trajectory-like file.
     openBabelCommand = "obabel {}.{} -O {} --conformer --nconf {} --score {} --writeconformers".format(molFileName,
-                                                                                                      fileFormat,
-                                                                                                      confOutTrajName,
-                                                                                                      numConfrmrs,
-                                                                                                      scoreFunction)
+                                                                                                       fileFormat,
+                                                                                                       confOutTrajName,
+                                                                                                       numConfrmrs,
+                                                                                                       scoreFunction)
 
     print(openBabelCommand) if (verbose > 2) else None # Debug printouts.
 
     # Execute the command on the shell and wait until finished. An output file will be produced.
-    # NOTE: The following line requires the executable of OpenBabel to be accessible from the shell.
     # TODO: Make sure that the file is output to the correct location!!
     if (verbose < 2):
         OpenBabelProcess = subprocess.Popen(openBabelCommand,
@@ -293,8 +312,8 @@ def molFileToConfTraj(smiles,
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 def getChargeFromSmiles(smiles, verbose=0):
     """
-    From a SMILES string use OpenBabel to determine the molecule's charge. 
-    
+    From a SMILES string use OpenBabel to determine the molecule's charge.
+
     Parameters
     ----------
     smiles : str
@@ -317,9 +336,9 @@ def getChargeFromSmiles(smiles, verbose=0):
     mol = openbabel.OBMol()
     obConversion.ReadString(mol, smiles)
     charge = mol.GetTotalCharge()
-    
+
     print("Molecular charge = {} a.u.".format(charge)) if (verbose > 2) else None # Debug printouts.
-    
+
     return charge
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 
@@ -328,14 +347,14 @@ def getMultipFromSmiles(smiles, verbose=0):
     """
     From a SMILES string use OpenBabel to determine the molecule's 
     multiplicity.
-    
+
     Parameters
     ----------
     smiles : str
         A SMILES string for the molecule.
     verbose : int
         Adjusts the level of detail of the printouts.
-    
+
     Returns
     -------
     multiplicity : int
@@ -351,9 +370,9 @@ def getMultipFromSmiles(smiles, verbose=0):
     mol = openbabel.OBMol()
     obConversion.ReadString(mol, smiles)
     multiplicity = mol.GetTotalSpinMultiplicity()
-    
+
     print("Molecular spin multiplicity = {} a.u.".format(multiplicity)) if (verbose > 2) else None # Debug printouts.
-    
+
     return multiplicity
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 
@@ -382,7 +401,7 @@ def splitTrajToDict(smiles, confOutTrajName='Confrmrs.xyz', molNameAbv='MOL', mo
     >>> splitTrajToDict('CC', 'EtConf.xyz', verbose=0)
 
     """
- 
+
     conformers = {}
     trajLines = []
 
@@ -394,42 +413,42 @@ def splitTrajToDict(smiles, confOutTrajName='Confrmrs.xyz', molNameAbv='MOL', mo
     confIdx = -1 # Indexing of conformers start at 0.
 
     for idx, line in enumerate(trajLines):
-        
+
         if (idx%(numAtoms + 2) == 0):
             confIdx += 1
             conformers[confIdx] = {}                                             # A dictionary for the conformer.
-            conformers[confIdx]['MoleculeName']    = molNameFull                 # TODO # The conformer's molecule type name. 
-            conformers[confIdx]['MoleculeAbv']     = molNameAbv                  # TODO # The molecule's name abbreviation. 
-            conformers[confIdx]['Index']           = confIdx                     # The conformer's index. 
-            conformers[confIdx]['SMILES']          = smiles                      # The conformer's SMILES string. 
-            conformers[confIdx]['NumberOfAtoms']   = numAtoms                    # Number of atoms the structure. 
+            conformers[confIdx]['MoleculeName']    = molNameFull                 # The conformer's molecule type name.
+            conformers[confIdx]['MoleculeAbv']     = molNameAbv                  # The molecule's name abbreviation.
+            conformers[confIdx]['Index']           = confIdx                     # The conformer's index.
+            conformers[confIdx]['SMILES']          = smiles                      # The conformer's SMILES string.
+            conformers[confIdx]['NumberOfAtoms']   = numAtoms                    # Number of atoms the structure.
             conformers[confIdx]['Charge']          = getChargeFromSmiles(smiles) # Molecular charge.
             conformers[confIdx]['Multiplicity']    = getMultipFromSmiles(smiles) # Molecular spin multiplicity.
             conformers[confIdx]['MolecularWeight'] = None                        # Molecular weight (to be computed).
             conformers[confIdx]['Atoms']           = {}                          # Dictionary for conformer's atoms.
 
         atomIdx = (idx - 2) % (numAtoms + 2)
-        
+
         if (idx%(numAtoms + 2) == 1):
             conformers[confIdx]['MolecularWeight'] = float(line[:-1])
-        
+
         if (len(line.split()) >= 3):
-            
+
             # A dictionary for the element and coordinates of each atom.
             atom = {}
-            
+
             elemsAndCoords  = line.split()
             atom['Element'] = elemsAndCoords[0]
             atom['X']       = float(elemsAndCoords[1])
             atom['Y']       = float(elemsAndCoords[2])
             atom['Z']       = float(elemsAndCoords[3])
-            
+
             # Append the new atom to the conformer dictionary.
             conformers[confIdx]['Atoms'][atomIdx] = atom
-            
+
     if (verbose > 2): # Debug printouts.
         pp.pprint(conformers)
-                
+
     return conformers
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 
@@ -438,7 +457,7 @@ def getAvailMemFromPsutil(verbose=0):
     """
     Imports the non-standard psutil module to return the amount of available
     system memory in bytes.
-    
+
     Parameters
     ----------
     verbose : int
@@ -454,11 +473,42 @@ def getAvailMemFromPsutil(verbose=0):
     >>> getAvailMemFromPsutil(verbose=3)
     Current available system memory (RAM) = 3359.28 MB
     """
-    
-    import psutil
+
+    try:
+        import psutil
+
+    except ImportError:
+        openBabelImportError = """
+    +----------------------------+
+    | PSUtil Module Import Error | Unable to import the PSUtil module.
+    +----------------------------+
+
+    Is PSUtil installed in your system?
+    Create a conda environment with the dependencies required by this code.
+    First download a version of Anaconda, i.e. Miniconda:
+
+      $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+    Execute the installer and follow on-screen instructions:
+
+      $ bash Miniconda3-latest-Linux-x86_64.sh
+
+    Then create a conda environment using the following command:
+
+      $ conda create -n Psi4Smiles psi4=1.3.2 psi4-rt=1.3 python=3.7 openbabel=3.1.0 psutil=5.8.0 -c psi4 -c conda-forge
+
+    Once the environment is created created, restart your shell and activate the environment:
+
+      $ conda activate Psi4Smiles
+
+    And execute this program again in the active environment.
+    """
+        print(openBabelImportError)
+        sys.exit()
+
     svmem      = psutil.virtual_memory()
     memInBytes = svmem.available
-    
+
     # Debug printouts.
     print("Current available system memory (RAM) = {:.2f} MB".format(memInBytes/(1024*1024))) if (verbose > 2) else None
 
@@ -492,7 +542,7 @@ def conformerToPsithon(conformer,
     -------
     p4InFolder/p4InFile : file
         Psithon input file for the conformer.
-    
+
     Examples
     --------
     >>> conformerToPsithon(conformer, totalNumConf, psi4)
@@ -522,16 +572,16 @@ def conformerToPsithon(conformer,
     # Molecule name
     p4MolName = "{}{}".format(conformer['MoleculeAbv'], str(conformer['Index']).zfill(len(str(totalNumConf))))
     p4In += "\nmolecule {} {{\n".format(p4MolName)
-    
+
     # Charge and multiplicity
     p4In += "{} {}\n".format(conformer['Charge'], conformer['Multiplicity'])
 
     # Elements and coordinates
     for key in conformer['Atoms'].keys():
         p4In += "  {:6} {:16.8f} {:16.8f} {:16.8f} \n".format(conformer['Atoms'][key]['Element'],
-                                                                      conformer['Atoms'][key]['X'],
-                                                                      conformer['Atoms'][key]['Y'],
-                                                                      conformer['Atoms'][key]['Z'])
+                                                              conformer['Atoms'][key]['X'],
+                                                              conformer['Atoms'][key]['Y'],
+                                                              conformer['Atoms'][key]['Z'])
     p4In += "}\n\n"
 
     # Creation of output directories # TODO: Check that this works for multiple conformers.
@@ -560,7 +610,7 @@ def conformerToPsithon(conformer,
     if (psi4['CubeProps'] == True):
         p4In += "  cubeprop_tasks    = ['frontier_orbitals', 'density', 'ESP', 'dual_descriptor']\n"
         p4In += "  cubeprop_filepath = $outpropdir\n"
-    
+
     p4In += "}\n\n"
 
     # Execution statement
@@ -601,7 +651,7 @@ def conformerToPsithon(conformer,
     with open(p4InFileName, 'w') as p4InFile:
         for line in p4In:
             p4InFile.write(line)
-   
+
     os.chdir(owd)
 
     return
@@ -625,11 +675,11 @@ def buildPsithonsFromConfDict(conformers, psi4, verbose=0):
     Returns
     -------
     p4InFolder : directory
-        A new directory in the current location with Psithon inputs.    
-    
+        A new directory in the current location with Psithon inputs.
+
     Examples
     --------
-    >>> buildPsithonsFromConfDict(conformers) 
+    >>> buildPsithonsFromConfDict(conformers)
     """
 
     # Determine available memory if not specified by the user.
@@ -638,7 +688,7 @@ def buildPsithonsFromConfDict(conformers, psi4, verbose=0):
         memInBytes = getAvailMemFromPsutil(verbose)
         memInGigaB = memInBytes/(1024*1024*1024)
         memStr = "{} GB".format(math.floor(memInGigaB))
-    
+
     else:
         memStr = "{:.1f} GB".format(float(psi4['Memory']))
 
@@ -653,7 +703,25 @@ def buildPsithonsFromConfDict(conformers, psi4, verbose=0):
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 def main(argv):
     """
-    #TODO: Short description
+    This program automates the generation quantum chemical calculation input
+    files for Psi4. The input files contain geometries extracted from a
+    genetic algorithm conformational search executed with Open Babel.
+
+    In a nutshell, what it does is:
+
+    (1) Starting from the SMILES description of a molecule it uses Open
+    Babel to construct the molecule's 3D-structure.
+
+    (2) From the 3D-structure, it uses Open Babel to run a genetic algorithm
+    conformational search and obtain a given number of geometries for the
+    molecule in a trajectory-like file.
+
+    (3) It then extracts the geometry of each conformer from the trajectory-
+    like file and stores it in a python dictionary object along with
+    complementary information about the molecule.
+
+    (4) Using the geometries and additional finormation of each conformer it
+    generates Psi4 Psithon input files with a given QM setup.
 
     Parameters
     ----------
@@ -665,15 +733,16 @@ def main(argv):
     molFile : file
         File with a molecular 3D structure.
     confOutTrajFile : file
-        Trajectory-like file with conformers produced by the genetic algorithm search.
+        Trajectory-like file with conformers from the GA search.
     p4InFolder/p4InFiles : directory/files
-        Psithon input files for every conformer contained in a new directory.
-    
+        Psithon files for every conformer contained in a new directory.
+
     Examples
     --------
-    >>> 
+    >>> main(sys.argv[1:])
     """
-    # Call parser creator to process options introduced by the user at execution. 
+
+    # Call parser creator to process options introduced by the user at execution.
     parser = createParser()
     args = parser.parse_args()
 
