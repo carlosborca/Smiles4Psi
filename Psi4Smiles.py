@@ -33,7 +33,7 @@
 #
 
 __author__  = "Carlos H. Borca, Satyen Dhamakar"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __credits__ = ["Carlos H. Borca", "Satyen Dhamakar", "Michael A. Webb"]
 __email__   = "cborca@princeton.edu"
 __license__ = "LGPLv3"
@@ -153,40 +153,77 @@ def processArgs(args):
 
     Returns
     -------
-    variables : dict
-        Set of variables 
+    keywords : dict
+        Set of runtime variables 
     """
 
-    variables = {} # A dictionary for variable objects.
+    keywords = {} # A dictionary for variable objects.
 
-    variables['SMILES']               = args.sm
-    variables['3DStructFileName']     = args.st
-    variables['3DStructFileFormat']   = args.ff
-    variables['ConfTrajFileName']     = args.ct
-    variables['NumberOfConformers']   = int(args.nc)
-    variables['ScoringFunction']      = args.sf
-    variables['MoleculeNameAbbrev']   = args.ab
-    variables['MoleculeNameFull']     = args.fn if args.fn else args.st
-    variables['Verbosity']            = int(args.vb)
-    variables['Psi4']                 = {}
-    variables['Psi4']['Memory']       = args.mm
-    variables['Psi4']['Method']       = args.mt
-    variables['Psi4']['SCFType']      = args.sc
-    variables['Psi4']['MP2Type']      = args.mp
-    variables['Psi4']['CCType']       = args.cc
-    variables['Psi4']['FreezeCore']   = bool(False if (args.fc.lower() == "false") else True)
-    variables['Psi4']['EConv']        = int(args.ec)
-    variables['Psi4']['DConv']        = int(args.dc)
-    variables['Psi4']['OneElecProps'] = bool(False if (args.oe.lower() == "false") else True)
-    variables['Psi4']['CubeProps']    = bool(False if (args.cb.lower() == "false") else True)
+    keywords['SMILES']               = args.sm
+    keywords['3DStructFileName']     = args.st
+    keywords['3DStructFileFormat']   = args.ff
+    keywords['ConfTrajFileName']     = args.ct
+    keywords['NumberOfConformers']   = int(args.nc)
+    keywords['ScoringFunction']      = args.sf
+    keywords['MoleculeNameAbbrev']   = args.ab
+    keywords['MoleculeNameFull']     = args.fn if args.fn else args.st
+    keywords['Verbosity']            = int(args.vb)
+    keywords['Psi4']                 = {}
+    keywords['Psi4']['Memory']       = args.mm
+    keywords['Psi4']['Method']       = args.mt
+    keywords['Psi4']['SCFType']      = args.sc
+    keywords['Psi4']['MP2Type']      = args.mp
+    keywords['Psi4']['CCType']       = args.cc
+    keywords['Psi4']['FreezeCore']   = bool(False if (args.fc.lower() == "false") else True)
+    keywords['Psi4']['EConv']        = int(args.ec)
+    keywords['Psi4']['DConv']        = int(args.dc)
+    keywords['Psi4']['OneElecProps'] = bool(False if (args.oe.lower() == "false") else True)
+    keywords['Psi4']['CubeProps']    = bool(False if (args.cb.lower() == "false") else True)
 
-    # Debug printouts.
-    if (variables['Verbosity'] > 2):
-        print("\nPsi4Smiles Runtime Configuration:\n")
-        pp.pprint(variables)
+    return keywords
+#--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
+
+#--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
+def printHeader(keywords):
+    """
+    Prints welcome message and additional execution details.
+
+    Parameters
+    ----------
+    keywords : dict
+        Set of runtime variables 
+
+    Examples
+    --------
+    >>> printHeader(keywords)
+    """
+
+    # Warnings printouts.
+    if (keywords['Verbosity'] > 0):
+        print("\n{}\n".format(36*"-="))
+        print("{}{}".format(31*" ", "Psi4Smiles"))
+        subtitle = """
+The tool for the automated execution of genetic algorithm conformational
+search coupled with a Psi4 conformer input generator from SMILES strings
+using Open Babel.
+
+         Carlos H. Borca, Satyen Dhamakar, and Michael A. Webb
+           Department of Chemical and Biological Engineering
+               School of Engineering and Applied Science
+                          Princeton University"""
+        print("{}".format(subtitle))
+        print("\n{}\n".format(36*"-="))
+
+    # Information printouts.
+    if (keywords['Verbosity'] > 1):
+        print("{}".format(72*"="))
+        print("Psi4Smiles runtime variables configuration (Keywords dictionary):")
+        print("{}".format(72*"-"))
+        pp.pprint(keywords)
+        print("{}".format(72*"="))
         print("")
 
-    return variables
+    return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -224,33 +261,36 @@ def smilesToMolFile(smiles, molFileName='Molecule', fileFormat='xyz', verbose=0)
     # Option `--append 'MW'` appends the molecular weight to the description of the molecule.
     openBabelCommand = "obabel -:'{}' -O {}.{} --gen3D --append 'MW'".format(smiles, molFileName, fileFormat)
 
-    print(openBabelCommand) if (verbose > 2) else None # Debug printouts.
+    print("\n3D-structure generation:\n{}".format(openBabelCommand)) if (verbose > 1) else None # Info printouts.
+    print("\n{} Output from Open Babel {}".format(24*"-", 24*"-")) if (verbose > 2) else None # Debug printouts.
 
     # Execute the command on the shell and wait until finished. An output file will be produced.
     # NOTE: The following line requires the executable of OpenBabel to be accessible from the shell.
     # TODO: Make sure that the file is output to the correct location!!
     # TODO: How is chirality going to be handled?
-    if (verbose < 2):
+    if (verbose > 2):
         openBabelProcess = subprocess.Popen(openBabelCommand,
-                                           shell=True,
-                                           stderr=subprocess.DEVNULL,
-                                           stdout=subprocess.DEVNULL)
+                                            shell=True)
     else:
         openBabelProcess = subprocess.Popen(openBabelCommand,
-                                           shell=True)
+                                            shell=True,
+                                            stderr=subprocess.DEVNULL,
+                                            stdout=subprocess.DEVNULL)
     openBabelProcess.wait()
+
+    print("{}".format(72*"-")) if (verbose > 2) else None # Debug printouts.
 
     return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 def molFileToConfTraj(smiles,
-                     molFileName='Molecule',
-                     fileFormat='xyz',
-                     confOutTrajName='Confrmrs.xyz',
-                     numConfrmrs=3,
-                     scoreFunction='rmsd',
-                     verbose=0):
+                      molFileName='Molecule',
+                      fileFormat='xyz',
+                      confOutTrajName='Confrmrs.xyz',
+                      numConfrmrs=3,
+                      scoreFunction='rmsd',
+                      verbose=0):
     """
     From a file with a molecule's 3D structure specified by a list of
     elements and their XYZ coordinates, run a conformational search and
@@ -292,19 +332,22 @@ def molFileToConfTraj(smiles,
                                                                                                        numConfrmrs,
                                                                                                        scoreFunction)
 
-    print(openBabelCommand) if (verbose > 2) else None # Debug printouts.
+    print("\nGA conformational search:\n{}".format(openBabelCommand)) if (verbose > 1) else None # Info printouts.
+    print("\n{} Output from Open Babel {}".format(24*"-", 24*"-")) if (verbose > 2) else None # Debug printouts.
 
     # Execute the command on the shell and wait until finished. An output file will be produced.
     # TODO: Make sure that the file is output to the correct location!!
-    if (verbose < 2):
+    if (verbose > 2):
         openBabelProcess = subprocess.Popen(openBabelCommand,
-                                           shell=True,
-                                           stderr=subprocess.DEVNULL,
-                                           stdout=subprocess.DEVNULL)
+                                            shell=True)
     else:
         openBabelProcess = subprocess.Popen(openBabelCommand,
-                                           shell=True)
+                                            shell=True,
+                                            stderr=subprocess.DEVNULL,
+                                            stdout=subprocess.DEVNULL)
     openBabelProcess.wait()
+
+    print("{}".format(72*"-")) if (verbose > 2) else None # Debug printouts.
 
     return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -337,7 +380,7 @@ def getChargeFromSmiles(smiles, verbose=0):
     obConversion.ReadString(mol, smiles)
     charge = mol.GetTotalCharge()
 
-    print("Molecular charge = {} a.u.".format(charge)) if (verbose > 2) else None # Debug printouts.
+    #print("\nMolecular charge = {} a.u.".format(charge)) if (verbose > 2) else None # Debug printouts.
 
     return charge
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -371,7 +414,7 @@ def getMultipFromSmiles(smiles, verbose=0):
     obConversion.ReadString(mol, smiles)
     multiplicity = mol.GetTotalSpinMultiplicity()
 
-    print("Molecular spin multiplicity = {} a.u.".format(multiplicity)) if (verbose > 2) else None # Debug printouts.
+    #print("\nMolecular spin multiplicity = {} a.u.".format(multiplicity)) if (verbose > 2) else None # Debug printouts.
 
     return multiplicity
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -416,18 +459,19 @@ def splitTrajToDict(smiles, confOutTrajName='Confrmrs.xyz', molNameAbv='MOL', mo
 
         if (idx%(numAtoms + 2) == 0):
             confIdx += 1
-            conformers[confIdx] = {}                                             # A dictionary for the conformer.
-            conformers[confIdx]['MoleculeName']    = molNameFull                 # The conformer's molecule type name.
-            conformers[confIdx]['MoleculeAbv']     = molNameAbv                  # The molecule's name abbreviation.
-            conformers[confIdx]['Index']           = confIdx                     # The conformer's index.
-            conformers[confIdx]['SMILES']          = smiles                      # The conformer's SMILES string.
-            conformers[confIdx]['NumberOfAtoms']   = numAtoms                    # Number of atoms the structure.
-            conformers[confIdx]['Charge']          = getChargeFromSmiles(smiles) # Molecular charge.
-            conformers[confIdx]['Multiplicity']    = getMultipFromSmiles(smiles) # Molecular spin multiplicity.
-            conformers[confIdx]['MolecularWeight'] = None                        # Molecular weight (to be computed).
-            conformers[confIdx]['Atoms']           = {}                          # Dictionary for conformer's atoms.
 
-        atomIdx = (idx - 2) % (numAtoms + 2)
+            conformers[confIdx] = {}                                                      # Conformer's dictionary.
+            conformers[confIdx]['MoleculeName']    = molNameFull                          # Conformer's molecule name.
+            conformers[confIdx]['MoleculeAbv']     = molNameAbv                           # Molecule name abbreviation.
+            conformers[confIdx]['Index']           = confIdx                              # Conformer's index.
+            conformers[confIdx]['SMILES']          = smiles                               # Conformer's SMILES string.
+            conformers[confIdx]['NumberOfAtoms']   = numAtoms                             # Total number of atoms.
+            conformers[confIdx]['Charge']          = getChargeFromSmiles(smiles, verbose) # Molecular charge.
+            conformers[confIdx]['Multiplicity']    = getMultipFromSmiles(smiles, verbose) # Molecular spin multiplicity.
+            conformers[confIdx]['MolecularWeight'] = None                                 # Molecular weight (below).
+            conformers[confIdx]['Atoms']           = {}                                   # Dictionary conformer atoms.
+
+        atomIdx = (idx - 2)%(numAtoms + 2)                                                # First two lines are extras
 
         if (idx%(numAtoms + 2) == 1):
             conformers[confIdx]['MolecularWeight'] = float(line[:-1])
@@ -446,8 +490,9 @@ def splitTrajToDict(smiles, confOutTrajName='Confrmrs.xyz', molNameAbv='MOL', mo
             # Append the new atom to the conformer dictionary.
             conformers[confIdx]['Atoms'][atomIdx] = atom
 
-    if (verbose > 2): # Debug printouts.
-        pp.pprint(conformers)
+    # Information printouts.
+    if (verbose > 1):
+        print("\nConformers dictionary now contains {} entries".format(len(conformers)))
 
     return conformers
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -478,7 +523,7 @@ def getAvailMemFromPsutil(verbose=0):
         import psutil
 
     except ImportError:
-        openBabelImportError = """
+        psutilImportError = """
     +----------------------------+
     | PSUtil Module Import Error | Unable to import the PSUtil module.
     +----------------------------+
@@ -503,14 +548,14 @@ def getAvailMemFromPsutil(verbose=0):
 
     And execute this program again in the active environment.
     """
-        print(openBabelImportError)
+        print(psutilImportError)
         sys.exit()
 
     svmem      = psutil.virtual_memory()
     memInBytes = svmem.available
 
-    # Debug printouts.
-    print("Current available system memory (RAM) = {:.2f} MB".format(memInBytes/(1024*1024))) if (verbose > 2) else None
+    # Information printouts.
+    print("\nCurrent available system memory (RAM) = {:.2f} MB".format(memInBytes/(1024*1024))) if (verbose > 1) else None
 
     return memInBytes
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -631,9 +676,13 @@ def conformerToPsithon(conformer,
     # Directives to write CUBE files (last in case it fails)
     if (psi4['CubeProps'] == True):
         p4In += "# Write CUBE files as specified with the cubeprop_tasks settings-keyword.\n"
-        p4In += "cubeprop(wfn)\n"
+        p4In += "cubeprop(wfn)"
 
-    print("\n{}\n".format(p4In)) if (verbose > 2) else None # Debug printouts.
+    # Debug printouts.
+    if (verbose > 2):
+        print("{}\n".format(72*"."))
+        print("{}".format(p4In))
+        print("{}".format(72*"."))
 
     # Write Psithon input to a new directory
     owd = os.getcwd()
@@ -692,10 +741,47 @@ def buildPsithonsFromConfDict(conformers, psi4, verbose=0):
     else:
         memStr = "{:.1f} GB".format(float(psi4['Memory']))
 
+    # For style purposes
+    print("") if (verbose > 2) else None # Debug printouts.
+    print("{}".format(72*"-")) if (verbose > 2) else None # Debug printouts.
+
+    # Generate a psithon input for each conformer.
     for key in conformers.keys():
-        print("Generating Psi4 Input for Conformer {}".format(key)) if (verbose > 1) else None # Info printouts.
-        #pp.pprint(conformers[key])
+        print("") if (verbose > 2) else None # Debug printouts.
+        print("Generating Psi4 psithon input for conformer {}".format(key)) if (verbose > 1) else None # Info printouts.
+
+        if (verbose > 2): # Debug printouts.
+            print("{}".format(72*"."))
+            pp.pprint(conformers[key])
+
         conformerToPsithon(conformers[key], len(conformers), memStr, psi4, verbose)
+
+    return
+#--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
+
+#--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
+def printFooter(keywords):
+    """
+    Prints welcome message and additional execution details.
+
+    Parameters
+    ----------
+    keywords : dict
+        Set of runtime variables 
+
+    Examples
+    --------
+    >>> printHeader(keywords)
+    """
+
+    print("") if (keywords['Verbosity'] > 1) else None # Info printouts.
+
+    # Warnings printouts.
+    if (keywords['Verbosity'] > 0):
+        print("Execution terminated successfully.")
+        print("\n{}\n".format(36*"-="))
+        print("{}{}{}".format(21*" ", "Thank you for using Psi4Smiles", 21*" "))
+        print("\n{}\n".format(36*"-="))
 
     return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -747,34 +833,40 @@ def main(argv):
     args = parser.parse_args()
 
     # Process parsed arguments into usable objects.
-    variables = processArgs(args)
+    keywords = processArgs(args)
+
+    # Print the program's header.
+    printHeader(keywords)
 
     # Using Open Babel, pass the SMILES string to write a file with the molecular structure.
-    smilesToMolFile(variables['SMILES'],
-                    variables['3DStructFileName'],
-                    variables['3DStructFileFormat'],
-                    variables['Verbosity'])
+    smilesToMolFile(keywords['SMILES'],
+                    keywords['3DStructFileName'],
+                    keywords['3DStructFileFormat'],
+                    keywords['Verbosity'])
 
     # Use the molecular structure file to run a Genetic Algorithm Conformational search using Open Babel.
-    molFileToConfTraj(variables['SMILES'],
-                      variables['3DStructFileName'],
-                      variables['3DStructFileFormat'],
-                      variables['ConfTrajFileName'],
-                      variables['NumberOfConformers'],
-                      variables['ScoringFunction'],
-                      variables['Verbosity'])
+    molFileToConfTraj(keywords['SMILES'],
+                      keywords['3DStructFileName'],
+                      keywords['3DStructFileFormat'],
+                      keywords['ConfTrajFileName'],
+                      keywords['NumberOfConformers'],
+                      keywords['ScoringFunction'],
+                      keywords['Verbosity'])
 
     # From the resulting trajectory-like file, extract all the conformers information to a dictionary.
-    conformers = splitTrajToDict(variables['SMILES'],
-                                 variables['ConfTrajFileName'],
-                                 variables['MoleculeNameAbbrev'],
-                                 variables['MoleculeNameFull'],
-                                 variables['Verbosity'])
+    conformers = splitTrajToDict(keywords['SMILES'],
+                                 keywords['ConfTrajFileName'],
+                                 keywords['MoleculeNameAbbrev'],
+                                 keywords['MoleculeNameFull'],
+                                 keywords['Verbosity'])
 
     # Build and write Psithon inputs from the conformers dictionary.
     buildPsithonsFromConfDict(conformers, 
-                              variables['Psi4'],
-                              variables['Verbosity'])
+                              keywords['Psi4'],
+                              keywords['Verbosity'])
+
+    # Print the program's footer.
+    printFooter(keywords)
 
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 
