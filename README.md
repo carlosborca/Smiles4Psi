@@ -69,7 +69,7 @@ git clone https://github.com/carlosborca/Smiles4Psi.git
 
 ### How to run Smiles4Psi
 
-Documentation about the code an runtime options, including examples and defaults, can be found by executing with the `-h` or `--help` option.
+Documentation about the code and runtime options, including examples and defaults, can be found by executing with the `-h` or `--help` option.
 
 ```
 python Smiles4Psi.py --help
