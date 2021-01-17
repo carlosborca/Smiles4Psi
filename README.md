@@ -1,2 +1,2 @@
-# Psi4Smiles
-Automated genetic algorithm conformational sampler and Psi4 conformer input generator from SMILES strings using Open Babel
+# Smiles4Psi
+Automated conformational search with a genetic algorithm interfaced with a Psi4-input generator for conformers that requires only SMILES as input
