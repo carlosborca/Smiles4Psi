@@ -33,7 +33,7 @@
 #
 
 __author__  = "Carlos H. Borca, Satyen Dhamakar"
-__version__ = "0.0.3"
+__version__ = "0.0.4"
 __credits__ = ["Carlos H. Borca", "Satyen Dhamakar", "Michael A. Webb"]
 __email__   = "cborca@princeton.edu"
 __license__ = "LGPLv3"
@@ -49,6 +49,39 @@ import sys
 import pprint
 pp = pprint.PrettyPrinter(indent=1)
 
+# Non-standard module imports.
+try:
+    from openbabel import openbabel # NOTE: Requires the Open Babel python module available through python.
+
+except ImportError:
+    openBabelImportError = """
+    +--------------------------------+
+    | Open Babel Module Import Error | Unable to import the Open Babel module.
+    +--------------------------------+
+    
+    Is Open Babel installed in your system?
+
+    Create a conda environment with the dependencies required by this code.
+    First download a version of Anaconda, i.e. Miniconda:
+    
+      $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    
+    Execute the installer and follow on-screen instructions:
+    
+      $ bash Miniconda3-latest-Linux-x86_64.sh
+    
+    Then create a conda environment using the following command:
+    
+      $ conda create -n S4P psi4=1.3.2 psi4-rt=1.3 python=3.7 openbabel=3.1.0 psutil=5.8.0 -c psi4 -c conda-forge
+    
+    Once the environment is created created, restart your shell and activate the environment:
+    
+      $ conda activate S4P
+
+    And execute this program again in the active environment.
+    """
+    print(openBabelImportError)
+    sys.exit()
 
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 def createParser():
@@ -197,47 +230,6 @@ a Psi4-input generator for conformers that requires only SMILES as input
         pp.pprint(keywords)
         print("{}".format(72*"="))
         print("")
-
-    return
-#--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
-
-#--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
-def importOpenBabel(verbose=0):
-
-    # Non-standard module imports.
-    try:
-        from openbabel import openbabel # NOTE: Requires the Open Babel python module available through python.
-
-    except ImportError:
-        openBabelImportError = """
-    +--------------------------------+
-    | Open Babel Module Import Error | Unable to import the Open Babel module.
-    +--------------------------------+
-
-    Is Open Babel installed in your system?
-    Create a conda environment with the dependencies required by this code.
-    First download a version of Anaconda, i.e. Miniconda:
-
-      $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-
-    Execute the installer and follow on-screen instructions:
-
-      $ bash Miniconda3-latest-Linux-x86_64.sh
-
-    Then create a conda environment using the following command:
-
-      $ conda create -n Smiles4Psi psi4=1.3.2 psi4-rt=1.3 python=3.7 openbabel=3.1.0 psutil=5.8.0 -c psi4 -c conda-forge
-
-    Once the environment is created created, restart your shell and activate the environment:
-
-      $ conda activate Smiles4Psi
-
-    And execute this program again in the active environment.
-"""
-        print(openBabelImportError)
-        sys.exit()
-
-    print("Open Babel module imported succesfully") if (verbose > 2) else None # Debug.
 
     return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -556,11 +548,11 @@ def getAvailMemFromPsutil(verbose=0):
 
     Then create a conda environment using the following command:
 
-      $ conda create -n Smiles4Psi psi4=1.3.2 psi4-rt=1.3 python=3.7 openbabel=3.1.0 psutil=5.8.0 -c psi4 -c conda-forge
+      $ conda create -n S4P psi4=1.3.2 psi4-rt=1.3 python=3.7 openbabel=3.1.0 psutil=5.8.0 -c psi4 -c conda-forge
 
     Once the environment is created created, restart your shell and activate the environment:
 
-      $ conda activate Smiles4Psi
+      $ conda activate S4P
 
     And execute this program again in the active environment.
     """
@@ -857,15 +849,15 @@ def main(argv):
     >>> main(sys.argv[1:])
     """
 
+    # Check arguments given:
+    print("No arguments passed. Check documentation: `python Smiles4Psi --help`") if (not argv) else ""
+    
     # Call parser creator to process options introduced by the user at execution.
     parser = createParser()
     args = parser.parse_args()
 
     # Process parsed arguments into usable objects.
     keywords = processArgs(args)
-
-    # Import the Open Babel module (placed here to still print help in case of import failure).
-    importOpenBabel(keywords['Verbosity'])
 
     # Print the program's header.
     printHeader(keywords)
