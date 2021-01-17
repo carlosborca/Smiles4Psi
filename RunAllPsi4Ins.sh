@@ -28,6 +28,5 @@ for FILE in *.in
 do
     NOEXTNAME=`echo $FILE | cut -d'.' --complement -f2-`
     echo "Executing ${NOEXTNAME}.in with ${ARG1} on ${ARG2} threads."
-    #psi4 -i ${NOEXTNAME}.in -o ${NOEXTNAME}.out -n 4
     ${ARG1} -i ${NOEXTNAME}.in -o ${NOEXTNAME}.out -n ${ARG2}
 done
