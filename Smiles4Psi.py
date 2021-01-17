@@ -45,51 +45,20 @@ import os
 import subprocess
 import sys
 
-# Non-standard module imports.
-try:
-    from openbabel import openbabel # NOTE: Requires the Open Babel python module available through python.
-
-except ImportError:
-    openBabelImportError = """
-    +--------------------------------+
-    | Open Babel Module Import Error | Unable to import the Open Babel module.
-    +--------------------------------+
-
-    Is Open Babel installed in your system?
-    Create a conda environment with the dependencies required by this code.
-    First download a version of Anaconda, i.e. Miniconda:
-
-      $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-
-    Execute the installer and follow on-screen instructions:
-
-      $ bash Miniconda3-latest-Linux-x86_64.sh
-
-    Then create a conda environment using the following command:
-
-      $ conda create -n Smiles4Psi psi4=1.3.2 psi4-rt=1.3 python=3.7 openbabel=3.1.0 psutil=5.8.0 -c psi4 -c conda-forge
-
-    Once the environment is created created, restart your shell and activate the environment:
-
-      $ conda activate Smiles4Psi
-
-    And execute this program again in the active environment.
-    """
-    print(openBabelImportError)
-    sys.exit()
-
 # Setting up pretty print for debug printouts.
 import pprint
-pp = pprint.PrettyPrinter(indent=2)
+pp = pprint.PrettyPrinter(indent=1)
+
 
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 def createParser():
 
     # For the argument parser. An example of usuage and a description of what this script does.
-    exas =  "python {} 'CCO' -st Ethanol -ff xyz -ct c.xyz -nc 100"
-    exas += " -ab EtOH -fn 'Alcohol' -vb 1 -oe True".format(sys.argv[0])
-    docs =  "Smiles4Psi: Automated conformational search and Psi4 conformer inputs generation from SMILES strings"
-    epis =  "Execution of this code requires the openbabel module. It also may need psutil."
+    exas =  "python {} 'CCO' -st Ethanol -ff xyz -ct c.xyz -nc 100 ".format(sys.argv[0])
+    exas += "-ab EtOH -fn 'Alcohol' -vb 1 -oe True"
+    docs =  "Smiles4Psi4: Automated conformational search with a genetic algorithm interfaced "
+    docs += "with a Psi4-input generator for conformers that requires only SMILES as input."
+    epis =  "Execution of this code requires the `openbabel` module. It may also need `psutil`."
 
     # Help strings.
     hsm = "SMILES string input, i.e. 'CCO'"
@@ -228,6 +197,47 @@ a Psi4-input generator for conformers that requires only SMILES as input
         pp.pprint(keywords)
         print("{}".format(72*"="))
         print("")
+
+    return
+#--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
+
+#--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
+def importOpenBabel(verbose=0):
+
+    # Non-standard module imports.
+    try:
+        from openbabel import openbabel # NOTE: Requires the Open Babel python module available through python.
+
+    except ImportError:
+        openBabelImportError = """
+    +--------------------------------+
+    | Open Babel Module Import Error | Unable to import the Open Babel module.
+    +--------------------------------+
+
+    Is Open Babel installed in your system?
+    Create a conda environment with the dependencies required by this code.
+    First download a version of Anaconda, i.e. Miniconda:
+
+      $ wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+    Execute the installer and follow on-screen instructions:
+
+      $ bash Miniconda3-latest-Linux-x86_64.sh
+
+    Then create a conda environment using the following command:
+
+      $ conda create -n Smiles4Psi psi4=1.3.2 psi4-rt=1.3 python=3.7 openbabel=3.1.0 psutil=5.8.0 -c psi4 -c conda-forge
+
+    Once the environment is created created, restart your shell and activate the environment:
+
+      $ conda activate Smiles4Psi
+
+    And execute this program again in the active environment.
+"""
+        print(openBabelImportError)
+        sys.exit()
+
+    print("Open Babel module imported succesfully") if (verbose > 2) else None # Debug.
 
     return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
@@ -488,10 +498,10 @@ def splitTrajToDict(smiles, confOutTrajName='Confrmrs.xyz', molNameAbv='MOL', mo
             atom = {}
 
             elemsAndCoords  = line.split()
-            atom['Element'] = elemsAndCoords[0]
-            atom['X']       = float(elemsAndCoords[1])
-            atom['Y']       = float(elemsAndCoords[2])
-            atom['Z']       = float(elemsAndCoords[3])
+            atom['e'] = elemsAndCoords[0]
+            atom['x']       = float(elemsAndCoords[1])
+            atom['y']       = float(elemsAndCoords[2])
+            atom['z']       = float(elemsAndCoords[3])
 
             # Append the new atom to the conformer dictionary.
             conformers[confIdx]['Atoms'][atomIdx] = atom
@@ -639,10 +649,10 @@ def conformerToPsithon(conformer,
 
     # Elements and coordinates
     for key in conformer['Atoms'].keys():
-        p4In += "  {:6} {:16.8f} {:16.8f} {:16.8f} \n".format(conformer['Atoms'][key]['Element'],
-                                                              conformer['Atoms'][key]['X'],
-                                                              conformer['Atoms'][key]['Y'],
-                                                              conformer['Atoms'][key]['Z'])
+        p4In += "  {:6} {:16.8f} {:16.8f} {:16.8f} \n".format(conformer['Atoms'][key]['e'],
+                                                              conformer['Atoms'][key]['x'],
+                                                              conformer['Atoms'][key]['y'],
+                                                              conformer['Atoms'][key]['z'])
     p4In += "}\n\n"
 
     # Creation of output directories # TODO: Check that this works for multiple conformers.
@@ -795,9 +805,11 @@ def printFooter(keywords):
 
     # Warnings.
     if (keywords['Verbosity'] > 0):
-        print("Execution terminated successfully.")
+        print("{}------------------------------------".format(18*" "))
+        print("{} Execution terminated successfully! ".format(18*" "))
+        print("{}------------------------------------".format(18*" "))
         print("\n{}\n".format(36*"-="))
-        print("{}{}{}".format(21*" ", "Thank you for using Smiles4Psi", 21*" "))
+        print("{}{}".format(21*" ", "Thank you for using Smiles4Psi"))
         print("\n{}\n".format(36*"-="))
 
     return
@@ -852,6 +864,9 @@ def main(argv):
     # Process parsed arguments into usable objects.
     keywords = processArgs(args)
 
+    # Import the Open Babel module (placed here to still print help in case of import failure).
+    importOpenBabel(keywords['Verbosity'])
+
     # Print the program's header.
     printHeader(keywords)
 
@@ -885,6 +900,7 @@ def main(argv):
     # Print the program's footer.
     printFooter(keywords)
 
+    return
 #--------+---------+---------+---------+---------+---------+---------+-=---=---+---------+---------+---------+---------#
 
 # Main code execution
