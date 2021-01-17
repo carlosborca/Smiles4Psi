@@ -69,6 +69,12 @@ git clone https://github.com/carlosborca/Smiles4Psi.git
 
 ### How to run Smiles4Psi
 
+Documentation about the code an runtime options, including examples and defaults, can be found by executing with the `-h` or `--help` option.
+
+```
+python Smiles4Psi.py --help
+```
+
 The code uses the _current working directory_ as a reference point for execution and will produce new files and directories on that current workin directory upon execution. Therefore, one needs to navigate to the folder where the files are meant to be produced and execute the Python 3 code there, within the _S4P_ environment.
 
 ```
