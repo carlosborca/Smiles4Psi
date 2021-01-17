@@ -1,4 +1,4 @@
-<img align="center" src="https://github.com/carlosborca/NameDaTaken/blob/master/media/logo/Logo.png" height=260>
+<img align="center" src="https://github.com/carlosborca/Smiles4Psi/blob/master/media/logo/Logo.png" height=260>
 
 Automated conformational search with a genetic algorithm interfaced with a Psi4-input generator for conformers that requires only SMILES as input
 
