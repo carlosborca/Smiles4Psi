@@ -2,10 +2,10 @@
 # Smiles4Psi
 Automated conformational search with a genetic algorithm interfaced with a Psi4-input generator for conformers that requires only SMILES as input
 
-<!-- | Category | Badges |
+| Category | Badges |
 |-------------|-------------|
-| **Foundation** | [![License](https://img.shields.io/github/license/carlosborca/NameDaTaken.svg)](https://opensource.org/licenses/LGPL-3.0) [![GitHub Top Languages](https://img.shields.io/github/languages/top/carlosborca/NameDaTaken)](https://github.com/carlosborca/NameDaTaken/) |
-| **GitHub Info** | [![GitHub Code Size](https://img.shields.io/github/languages/code-size/carlosborca/NameDaTaken)](https://github.com/carlosborca/NameDaTaken/) [![GitHub Commits per Month](https://img.shields.io/github/commit-activity/m/carlosborca/NameDaTaken)](https://github.com/carlosborca/NameDaTaken/) [![GitHub Last Commit](https://img.shields.io/github/last-commit/carlosborca/NameDaTaken)](https://github.com/carlosborca/NameDaTaken/) | -->
+| **Foundation** | [![License](https://img.shields.io/github/license/carlosborca/Smiles4Psi.svg)](https://opensource.org/licenses/LGPL-3.0) [![GitHub Top Languages](https://img.shields.io/github/languages/top/carlosborca/Smiles4Psi)](https://github.com/carlosborca/Smiles4Psi/) |
+| **GitHub Info** | [![GitHub Code Size](https://img.shields.io/github/languages/code-size/carlosborca/Smiles4Psi)](https://github.com/carlosborca/Smiles4Psi/) [![GitHub Commits per Month](https://img.shields.io/github/commit-activity/m/carlosborca/Smiles4Psi)](https://github.com/carlosborca/Smiles4Psi/) [![GitHub Last Commit](https://img.shields.io/github/last-commit/carlosborca/Smiles4Psi)](https://github.com/carlosborca/Smiles4Psi/) |
 
 ## Overview
 
