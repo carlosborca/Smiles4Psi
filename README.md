@@ -17,7 +17,7 @@ To run Smiles4Psi, the code requires Python 3.7 and its modules `psi4`, `psi4-rt
 
 ### Installation
 
-Minimal set of commands to install Smiles4Psi on Linux, MacOS, or Windows (with the Windows Subsystem for Linux). Last tested on 17 January 2021:
+Minimal set of commands to install Smiles4Psi on Linux, MacOS, or Windows (with the Windows Subsystem for Linux). Last tested on 16 August 2021:
 
 #### 1. Install Miniconda:
 
@@ -75,7 +75,7 @@ Documentation about the code and runtime options, including examples and default
 python Smiles4Psi.py --help
 ```
 
-The code uses the _current working directory_ as a reference point for execution and will produce new files and directories on that current workin directory upon execution. Therefore, one needs to navigate to the folder where the files are meant to be produced and execute the Python 3 code there, within the _S4P_ environment.
+The code uses the _current working directory_ as a reference point for execution and will produce new files and directories on that current working directory upon execution. Therefore, one needs to navigate to the folder where the files are meant to be produced and execute the Python 3 code there, within the _S4P_ environment.
 
 ```
 conda activate S4P
