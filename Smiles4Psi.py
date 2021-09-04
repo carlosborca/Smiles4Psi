@@ -691,11 +691,11 @@ def conformerToPsithon(conformer,
 
     # All variables printout
     p4In += "# Print all output variables.\n"
-    p4In += "print_variables()"
+    p4In += "print_variables()\n"
 
     # Directives to write CUBE files (last in case it fails)
     if (psi4['CubeProps'] == True):
-        p4In += "\n\n# Write CUBE files as specified by the cubeprop_tasks settings.\n"
+        p4In += "\n# Write CUBE files as specified by the cubeprop_tasks settings.\n"
         p4In += "cubeprop(wfn)"
 
     # Debug.
